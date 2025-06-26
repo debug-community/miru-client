@@ -1,24 +1,22 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card.tsx';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shared/components/Card.tsx';
 import { Button } from '@/shared/components/Button.tsx';
 import { LoginProvider } from '@/feature/login/api/LoginProvider.enum.ts';
-import { LoginFormData, LoginSchema } from '@/feature/login/api/Login.ts';
+import { login, LoginFormData, LoginSchema } from '@/feature/login/api/Login.ts';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Form } from '@/shared/components/Form.tsx';
+import { Input } from '@/shared/components/Input';
 
 export const Login = () => {
-  const naverForm = useForm<LoginFormData>({
+  const form = useForm<LoginFormData>({
     resolver: zodResolver(LoginSchema),
-    defaultValues: {
-      provider: LoginProvider.NAVER,
-    },
   });
 
-  const kakaoForm = useForm<LoginFormData>({
-    resolver: zodResolver(LoginSchema),
-    defaultValues: {
-      provider: LoginProvider.KAKAO,
-    },
-  });
+  const handleForm = async (provider: LoginProvider) => {
+    form.setValue('provider', provider);
+    const submit = form.handleSubmit(login);
+    await submit();
+  };
 
   return (
     <div className={'flex size-full justify-center items-center bg-amber-900'}>
@@ -26,14 +24,29 @@ export const Login = () => {
         <CardHeader className={'items-center justify-center'}>
           <CardTitle className={'text-green-800'}>접속할 SNS 계정을 선택해주세요.</CardTitle>
         </CardHeader>
-        <CardContent className={'flex flex-row flex-1 items-center justify-center w-full gap-10'}>
-          <Button type={'submit'} className="p-0 border-none bg-transparent hover:bg-emerald-500">
-            <img src={'src/assets/naver.svg'} alt={'naver'} className={'h-11/12 w-11/12'}></img>
-          </Button>
-          <Button type={'submit'} className="p-0 border-none bg-transparent hover:bg-amber-300">
-            <img src={'src/assets/kakao.svg'} alt={'kakao'} className={'h-11/12 w-11/12'}></img>
-          </Button>
+        <CardContent>
+          <Form {...form}>
+            <form>
+              <Input type="hidden" {...form.register('provider')} />
+            </form>
+          </Form>
         </CardContent>
+        <CardFooter className={'flex flex-row flex-1 items-center justify-center w-full gap-10'}>
+          <Button
+            type={'button'}
+            onClick={async () => await handleForm(LoginProvider.NAVER)}
+            className="p-0 border-none bg-transparent hover:bg-emerald-500"
+          >
+            <img src={'src/assets/naver.svg'} alt={'naver'} className={'h-11/12 w-11/12'} />
+          </Button>
+          <Button
+            type={'button'}
+            onClick={async () => await handleForm(LoginProvider.KAKAO)}
+            className="p-0 border-none bg-transparent hover:bg-amber-300"
+          >
+            <img src={'src/assets/kakao.svg'} alt={'kakao'} className={'h-11/12 w-11/12'} />
+          </Button>
+        </CardFooter>
       </Card>
     </div>
   );
